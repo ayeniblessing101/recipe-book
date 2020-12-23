@@ -1,8 +1,8 @@
 package models
 
-// User struct
+// User model defines the structure for user and the fields required
 type User struct {
-	ID int
+	ID   int
 	Name string
 	Role string
 }
