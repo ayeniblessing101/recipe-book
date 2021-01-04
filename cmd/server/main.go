@@ -8,5 +8,5 @@ import (
 
 func main() {
 	fmt.Println("Hello, World!")
-	server.Server()
+	server.Server(":8000")
 }
