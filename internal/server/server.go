@@ -12,9 +12,7 @@ func handleHelloWorld(w http.ResponseWriter, r *http.Request) {
 }
 
 // Server method handles all requests
-func Server(port string) error {
+func Server(port string) {
 	http.HandleFunc("/", handleHelloWorld)
 	log.Fatal(http.ListenAndServe(port, nil))
-	
-	return nil
 }
