@@ -1,3 +1,3 @@
-module github.com/ayeniblessing101/recipe-book.git
+module github.com/ayeniblessing101/recipe-book
 
 go 1.15
