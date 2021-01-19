@@ -3,13 +3,12 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	"html"
 	"log"
 	"net/http"
+	"text/template"
 
 	"github.com/ayeniblessing101/recipe-book/internal/database"
 	"github.com/ayeniblessing101/recipe-book/internal/models"
-	"github.com/davecgh/go-spew/spew"
 )
 
 var db *sql.DB
@@ -39,14 +38,28 @@ func AddCategory(w http.ResponseWriter, r *http.Request) {
 	if insertingError != nil {
 		log.Fatal("An error occured inserting into the table : ", insertingError)
 	}
-
-	if _, err := stmt.Exec("Vegetables"); err != nil {
-		log.Fatal("An error occured", err)
+    categories := []models.Category{
+		{ID: 1, Name: "Fruits"},
+		{ID: 2, Name: "Cereal"},
+		{ID: 3, Name: "Pasta"},
+		{ID: 4, Name: "Poultry"},
+		{ID: 5, Name: "Vegetables"},
+	}
+	for idx := range categories {
+		if _, err := stmt.Exec(categories[idx].Name); err != nil {
+			log.Fatal("An error occured", err)
+		}
 	}
 }
 
 // GetCategories method retrieves all categories from the categories table
 func GetCategories(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("./internal/handlers/category.html")
+	
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	rows, err := db.Query("SELECT * FROM categories")
 
 	if err != nil {
@@ -54,10 +67,13 @@ func GetCategories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var category models.Category
+	var Categories []models.Category
+
 	for rows.Next() {
 		if err := rows.Scan(&category.ID, &category.Name); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Fprintf(w, html.EscapeString(spew.Sdump(category.ID, category.Name)))
+		Categories = append(Categories, category)
 	}
+	tmpl.Execute(w, Categories)
 }
