@@ -2,22 +2,37 @@
 package server
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
-	"net/http"
 
+	"github.com/ayeniblessing101/recipe-book/internal/database"
 	"github.com/ayeniblessing101/recipe-book/internal/handlers"
+	"github.com/gofiber/fiber/v2"
 )
 
-func handleHelloWorld(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "%s\n", "Hello Dima")
-	
+func setupRoutes(app *fiber.App) {
+	app.Get("/categories", handlers.GetCategories)
+	app.Post("/categories", handlers.AddCategory)
+}
+
+func initialDatabase() {
+	var err error
+	database.DBConn, err = sql.Open("sqlite3", "./recipe.db")
+
+	if err != nil {
+		log.Fatal("Failed to connect to the database", err)
+	}
+
+	database.DBConn.SetMaxOpenConns(1)
 }
 
 // Server method handles all requests
 func Server(port string) {
-	http.HandleFunc("/", handleHelloWorld)
-	http.HandleFunc("/categories", handlers.AddCategory)
-	http.HandleFunc("/categories", handlers.GetCategories)
-	log.Fatal(http.ListenAndServe(port, nil))
+	app := fiber.New()
+
+	initialDatabase()
+
+	setupRoutes(app)
+
+	log.Fatal(app.Listen(port))
 }
