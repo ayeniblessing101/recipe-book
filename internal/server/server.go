@@ -8,6 +8,7 @@ import (
 	"github.com/ayeniblessing101/recipe-book/internal/database"
 	"github.com/ayeniblessing101/recipe-book/internal/handlers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html"
 )
 
 func setupRoutes(app *fiber.App) {
@@ -28,7 +29,11 @@ func initialDatabase() {
 
 // Server method handles all requests
 func Server(port string) {
-	app := fiber.New()
+	engine := html.New("internal/handlers/views", ".html")
+	
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
 
 	initialDatabase()
 

@@ -13,18 +13,12 @@ func AddCategory(c *fiber.Ctx) error {
 	stmt, createTableError := db.Prepare("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY, name TEXT)")
 
 	if createTableError != nil {
-		return c.Status(500).JSON(&fiber.Map{
-			"success": false,
-			"error": createTableError,
-		})
+		return createTableError
 	}
 	stmt.Exec()
 
 	if err := c.BodyParser(cat); err != nil {
-		return c.Status(400).JSON(&fiber.Map{
-			"success": false,
-			"error": err,
-		})
+		return err
 	}
 
 	stmt, insertingError := database.DBConn.Prepare("INSERT INTO categories (name) VALUES (?)")
@@ -32,35 +26,22 @@ func AddCategory(c *fiber.Ctx) error {
 	defer stmt.Close()
 
 	if insertingError != nil {
-		return c.Status(500).JSON(&fiber.Map{
-			"success": false,
-			"error": insertingError,
-		})
+		return insertingError
 	}	
 		if _, err := stmt.Exec(cat.Name); err != nil {
-			return c.Status(500).JSON(&fiber.Map{
-				"success": false,
-				"error": err,
-			})
+			return err
 		}
-	return c.Status(201).JSON(&fiber.Map{
-		"success": true,
-		"message": "Category created successfully",
-		"category": cat,
-	})
+	 return  c.Redirect("/categories", 201)
 }
 
 // GetCategories method retrieves all categories from the categories table
 func GetCategories(c *fiber.Ctx) error {
 	db := database.DBConn
-	
+
 	rows, err := db.Query("SELECT * FROM categories")
 
 	if err != nil {
-		return c.Status(500).JSON(&fiber.Map{
-			"success": false,
-			"error": err,
-		})
+		return err
 	}
 
 	var category models.Category
@@ -68,15 +49,10 @@ func GetCategories(c *fiber.Ctx) error {
 
 	for rows.Next() {
 		if err := rows.Scan(&category.ID, &category.Name); err != nil {
-			return c.Status(500).JSON(&fiber.Map{
-				"success": false,
-				"error": err, 
-			})
+			return err
 		}
 		categories = append(categories, category)
 	}
-	return c.Status(200).JSON(&fiber.Map{
-		"success": true,
-		"categories": categories,
-	})
+
+	return c.Render("category", categories)
 }
