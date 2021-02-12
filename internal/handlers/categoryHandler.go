@@ -31,7 +31,7 @@ func AddCategory(c *fiber.Ctx) error {
 		if _, err := stmt.Exec(cat.Name); err != nil {
 			return err
 		}
-	 return  c.Redirect("/categories", 201)
+	 return  c.Status(201).SendString("Category created successfully")
 }
 
 // GetCategories method retrieves all categories from the categories table
