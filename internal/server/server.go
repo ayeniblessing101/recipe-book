@@ -39,7 +39,7 @@ func Server(port string) {
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 			if errors.Is(err, sql.ErrNoRows)  {
 				errMessage = models.Error{Message: "Page Not Found"}
-				ctx.Redirect("/404", 500)
+				ctx.Status(404)
 				return ctx.Render("404", errMessage)
 			} else if err != nil {
 				errMessage = models.Error{Message: "An ERROR occured please try again later"}
