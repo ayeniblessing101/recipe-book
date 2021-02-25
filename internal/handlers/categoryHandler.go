@@ -1,10 +1,22 @@
 package handlers
 
 import (
+	"strconv"
+
 	"github.com/ayeniblessing101/recipe-book/internal/database"
 	"github.com/ayeniblessing101/recipe-book/internal/models"
+	"github.com/ayeniblessing101/recipe-book/internal/provider"
 	"github.com/gofiber/fiber/v2"
 )
+
+// CategoryProvider Interface show different behaviours that can be implemented by any concrete type
+type CategoryProvider interface {
+	CategoryGet(id int) (*models.Category, error)
+	CategoryUpdate(*models.Category) error
+	CategoryDelete(id int) error
+}
+
+var p = provider.NewProvider(database.DBConn)
 
 // AddCategory method adds category to the categories table
 func AddCategory(c *fiber.Ctx) error {
@@ -53,6 +65,18 @@ func GetCategories(c *fiber.Ctx) error {
 		}
 		categories = append(categories, category)
 	}
-
+	
 	return c.Render("category", categories)
+}
+
+// GetCategory method retrieves a category from the categories table
+func GetCategory(c *fiber.Ctx) error {
+	id := c.Params("id")
+	categoryID, _ := strconv.Atoi(id)
+	category, err := p.CategoryGet(categoryID)
+
+	if err != nil {
+		return err
+	}
+	return c.Render("category", category)
 }

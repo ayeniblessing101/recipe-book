@@ -15,6 +15,7 @@ import (
 
 func setupRoutes(app *fiber.App) {
 	app.Get("/categories", handlers.GetCategories)
+	app.Get("/categories/:id", handlers.GetCategory)
 	app.Post("/categories", handlers.AddCategory)
 }
 
