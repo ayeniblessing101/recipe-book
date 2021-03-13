@@ -5,15 +5,9 @@ import (
 
 	"github.com/ayeniblessing101/recipe-book/internal/database"
 	"github.com/ayeniblessing101/recipe-book/internal/models"
+	"github.com/ayeniblessing101/recipe-book/internal/providers"
 	"github.com/gofiber/fiber/v2"
 )
-
-// CategoryProvider Interface show different behaviours that can be implemented by any concrete type
-type CategoryProvider interface {
-	CategoryGet(id int) (*models.Category, error)
-	CategoryUpdate(*models.Category) error
-	CategoryDelete(id int) error
-}
 
 // AddCategory method adds category to the categories table
 func AddCategory(c *fiber.Ctx) error {
@@ -66,7 +60,7 @@ func GetCategories(c *fiber.Ctx) error {
 }
 
 // GetCategory method retrieves a category from the categories table
-func GetCategory(p CategoryProvider) func(c *fiber.Ctx) error {
+func GetCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
 		categoryID, _ := strconv.Atoi(id)
@@ -79,6 +73,22 @@ func GetCategory(p CategoryProvider) func(c *fiber.Ctx) error {
 		// wrapped into array to it works in the template
 		result := make([]*models.Category, 0)
 		result = append(result, category)
+		return c.Render("category", result)
+	}
+}
+
+// DeleteCategory method delete a category from the categories table and returns an error
+func DeleteCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
+		categoryID, _ := strconv.Atoi(id)
+		err := p.CategoryDelete(categoryID)
+
+		if err != nil {
+			return err
+		}
+
+		result := make([]*models.Category, 0)
 		return c.Render("category", result)
 	}
 }

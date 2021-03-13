@@ -9,17 +9,18 @@ import (
 	"github.com/ayeniblessing101/recipe-book/internal/database"
 	"github.com/ayeniblessing101/recipe-book/internal/handlers"
 	"github.com/ayeniblessing101/recipe-book/internal/models"
-	"github.com/ayeniblessing101/recipe-book/internal/provider"
+	"github.com/ayeniblessing101/recipe-book/internal/providers"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
 )
 
 func setupRoutes(app *fiber.App) {
-	p := provider.NewProvider(database.DBConn)
+	p := providers.NewProvider(database.DBConn)
 
 	app.Get("/categories", handlers.GetCategories)
 	app.Get("/categories/:id", handlers.GetCategory(p))
 	app.Post("/categories", handlers.AddCategory)
+	app.Delete("/categories/:id", handlers.DeleteCategory(p))
 }
 
 func initialDatabase() {

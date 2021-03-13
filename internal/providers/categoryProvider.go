@@ -1,10 +1,9 @@
-package provider
+package providers
 
 import (
 	"database/sql"
 	"log"
 
-	"github.com/ayeniblessing101/recipe-book/internal/handlers"
 	"github.com/ayeniblessing101/recipe-book/internal/models"
 )
 
@@ -15,19 +14,19 @@ type CategoryProvider interface {
 	CategoryDelete(id int) error
 }
 
-type Provider struct {
+type provider struct {
 	db *sql.DB
 }
 
 // NewProvider function create a new instance of the provider struct
-func NewProvider(db *sql.DB) handlers.CategoryProvider {
-	return &Provider{
+func NewProvider(db *sql.DB) CategoryProvider {
+	return &provider{
 		db: db,
 	}
 }
 
 // CategoryGet is a provider method that get a category from the database and returns it
-func (p *Provider) CategoryGet(id int) (*models.Category, error) {
+func (p *provider) CategoryGet(id int) (*models.Category, error) {
 	if p.db == nil {
 		panic("Blessing, db is nil, it means it did not initialize")
 	}
@@ -44,12 +43,36 @@ func (p *Provider) CategoryGet(id int) (*models.Category, error) {
 	return category, nil
 }
 
-func (p *Provider) CategoryDelete(id int) error {
-	// Blessing, I had to add this in order to satisfy the interface
+// CategoryDelete is a provider method that delete a category from the database and returns an error if any
+func (p *provider) CategoryDelete(id int) error {
+	if p.db == nil {
+		panic("db is nil")
+	}
+
+	stmt, err := p.db.Prepare("DELETE FROM categories WHERE id=?")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(id)
+	if err != nil {
+		return err
+	}
+    
+	// Hi Dima do I need to check for the rows affected
+	// affect, err := res.RowsAffected()
+
 	return nil
 }
 
-func (p *Provider) CategoryUpdate(cat *models.Category) error {
-	// Blessing, I had to add this in order to satisfy the interface
+// CategoryUpdate is a provider method that update a category from the database and return it
+func (p *provider) CategoryUpdate(cat *models.Category) error {
+	if p.db == nil {
+		panic("db is nil")
+	}
+
+	stmt,err := p.db.Prepare("UPDATE categories SET name=? WHERE id=?")
+
 	return nil
 }
