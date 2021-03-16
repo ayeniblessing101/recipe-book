@@ -10,7 +10,7 @@ import (
 // CategoryProvider Interface show different behaviours that can be implemented by any concrete type
 type CategoryProvider interface {
 	CategoryGet(id int) (*models.Category, error)
-	CategoryUpdate(*models.Category) error
+	CategoryUpdate(cat *models.Category, id int) error
 	CategoryDelete(id int) error
 }
 
@@ -67,12 +67,22 @@ func (p *provider) CategoryDelete(id int) error {
 }
 
 // CategoryUpdate is a provider method that update a category from the database and return it
-func (p *provider) CategoryUpdate(cat *models.Category) error {
+func (p *provider) CategoryUpdate(cat *models.Category, id int) (error) {
 	if p.db == nil {
 		panic("db is nil")
 	}
 
 	stmt,err := p.db.Prepare("UPDATE categories SET name=? WHERE id=?")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(cat.Name, id)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

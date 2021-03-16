@@ -20,6 +20,7 @@ func setupRoutes(app *fiber.App) {
 	app.Get("/categories", handlers.GetCategories)
 	app.Get("/categories/:id", handlers.GetCategory(p))
 	app.Post("/categories", handlers.AddCategory)
+	app.Patch("/categories/:id", handlers.UpdateCategory(p))
 	app.Delete("/categories/:id", handlers.DeleteCategory(p))
 }
 

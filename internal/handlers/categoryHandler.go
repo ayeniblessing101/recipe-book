@@ -77,6 +77,27 @@ func GetCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 	}
 }
 
+// UpdateCategory method update a category from the categories table and returns an error
+func UpdateCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
+		categoryID, _ := strconv.Atoi(id)
+    
+		cat := new(models.Category)
+
+		if err := c.BodyParser(cat); err != nil {
+			return err
+		}
+		err := p.CategoryUpdate(cat, categoryID)
+
+		if err != nil {
+			return err
+		}
+		result := make([]*models.Category, 0)
+		return c.Render("category", result)
+	}
+}
+
 // DeleteCategory method delete a category from the categories table and returns an error
 func DeleteCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
