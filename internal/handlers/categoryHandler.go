@@ -62,8 +62,7 @@ func GetCategories(c *fiber.Ctx) error {
 // GetCategory method retrieves a category from the categories table
 func GetCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		id := c.Params("id")
-		categoryID, _ := strconv.Atoi(id)
+		categoryID, _ := strconv.Atoi(c.Params("id"))
 		category, err := p.CategoryGet(categoryID)
 
 		if err != nil {
@@ -79,15 +78,13 @@ func GetCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 
 // UpdateCategory method update a category from the categories table and returns an error
 func UpdateCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
-	return func(c *fiber.Ctx) error {
-		id := c.Params("id")
-		categoryID, _ := strconv.Atoi(id)
-    
+	return func(c *fiber.Ctx) error {  
 		cat := new(models.Category)
 
 		if err := c.BodyParser(cat); err != nil {
 			return err
 		}
+		categoryID, _ := strconv.Atoi(c.Params("id"))
 		err := p.CategoryUpdate(cat, categoryID)
 
 		if err != nil {
@@ -101,8 +98,7 @@ func UpdateCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 // DeleteCategory method delete a category from the categories table and returns an error
 func DeleteCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		id := c.Params("id")
-		categoryID, _ := strconv.Atoi(id)
+		categoryID, _ := strconv.Atoi(c.Params("id"))
 		err := p.CategoryDelete(categoryID)
 
 		if err != nil {
