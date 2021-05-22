@@ -7,6 +7,8 @@ import (
 	"github.com/ayeniblessing101/recipe-book/internal/models"
 	"github.com/ayeniblessing101/recipe-book/internal/providers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // AddCategory method adds category to the categories table
@@ -14,9 +16,9 @@ func AddCategory(c *fiber.Ctx) error {
 	cat := new(models.Category)
 	db := database.DBConn
 	stmt, createTableError := db.Prepare("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY, name TEXT)")
-
+  zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	if createTableError != nil {
-		return createTableError
+		log.Error().Err(createTableError).Msg("")
 	}
 	stmt.Exec()
 
@@ -29,10 +31,10 @@ func AddCategory(c *fiber.Ctx) error {
 	defer stmt.Close()
 
 	if insertingError != nil {
-		return insertingError
+		log.Error().Err(insertingError).Msg("")
 	}
 	if _, err := stmt.Exec(cat.Name); err != nil {
-		return err
+		log.Error().Err(err).Msg("")
 	}
 	return c.Status(201).SendString("Category created successfully")
 }
@@ -44,7 +46,7 @@ func GetCategories(c *fiber.Ctx) error {
 	rows, err := db.Query("SELECT * FROM categories")
 
 	if err != nil {
-		return err
+		log.Error().Err(err).Msg("")
 	}
 
 	var category models.Category
@@ -52,7 +54,7 @@ func GetCategories(c *fiber.Ctx) error {
 
 	for rows.Next() {
 		if err := rows.Scan(&category.ID, &category.Name); err != nil {
-			return err
+			log.Error().Err(err).Msg("")
 		}
 		categories = append(categories, category)
 	}
@@ -66,7 +68,7 @@ func GetCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 		category, err := p.CategoryGet(categoryID)
 
 		if err != nil {
-			return err
+			log.Error().Err(err).Msg("")
 		}
 
 		// wrapped into array to it works in the template
@@ -82,13 +84,13 @@ func UpdateCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 		cat := new(models.Category)
 
 		if err := c.BodyParser(cat); err != nil {
-			return err
+			log.Error().Err(err).Msg("")
 		}
 		categoryID, _ := strconv.Atoi(c.Params("id"))
 		err := p.CategoryUpdate(cat, categoryID)
 
 		if err != nil {
-			return err
+			log.Error().Err(err).Msg("")
 		}
 		result := make([]*models.Category, 0)
 		return c.Render("category", result)
@@ -102,7 +104,7 @@ func DeleteCategory(p providers.CategoryProvider) func(c *fiber.Ctx) error {
 		err := p.CategoryDelete(categoryID)
 
 		if err != nil {
-			return err
+			log.Error().Err(err).Msg("")
 		}
 
 		result := make([]*models.Category, 0)

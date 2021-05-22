@@ -4,7 +4,10 @@ package server
 import (
 	"database/sql"
 	"errors"
-	"log"
+	golog "log"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"github.com/ayeniblessing101/recipe-book/internal/database"
 	"github.com/ayeniblessing101/recipe-book/internal/handlers"
@@ -29,7 +32,8 @@ func initialDatabase() {
 	database.DBConn, err = sql.Open("sqlite3", "./recipe.db")
 
 	if err != nil {
-		log.Fatal("Failed to connect to the database", err)
+		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+		log.Fatal().Err(err).Msg("Failed to connect to the database")
 	}
 
 	database.DBConn.SetMaxOpenConns(1)
@@ -42,7 +46,24 @@ func Server(port string) {
 	var errMessage models.Error
 
 	app := fiber.New(fiber.Config{
-		Views: engine,
+		Prefork:              false,
+		ServerHeader:         "",
+		StrictRouting:        false,
+		CaseSensitive:        false,
+		Immutable:            false,
+		UnescapePath:         false,
+		ETag:                 false,
+		BodyLimit:            0,
+		Concurrency:          0,
+		Views:                engine,
+		ReadTimeout:          0,
+		WriteTimeout:         0,
+		IdleTimeout:          0,
+		ReadBufferSize:       0,
+		WriteBufferSize:      0,
+		CompressedFileSuffix: "",
+		ProxyHeader:          "",
+		GETOnly:              false,
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 			if errors.Is(err, sql.ErrNoRows) {
 				errMessage = models.Error{Message: "Page Not Found"}
@@ -50,15 +71,22 @@ func Server(port string) {
 				return ctx.Render("404", errMessage)
 			} else if err != nil {
 				errMessage = models.Error{Message: "An ERROR occured please try again later"}
-				log.Println("error: ", err.Error())
+				zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+				log.Print("error: ", err.Error())
 				return ctx.Render("404", errMessage)
 			}
 			return nil
 		},
+		DisableKeepalive:          false,
+		DisableDefaultDate:        false,
+		DisableDefaultContentType: false,
+		DisableHeaderNormalizing:  false,
+		DisableStartupMessage:     false,
+		ReduceMemoryUsage:         false,
 	})
 
 	initialDatabase()
 	setupRoutes(app)
 
-	log.Fatal(app.Listen(port))
+	golog.Fatal(app.Listen(port))
 }
